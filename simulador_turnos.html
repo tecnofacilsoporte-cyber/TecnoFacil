@@ -2,26 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turnero Online</title>
+  <title>Turnero Online 🗓️</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: #f9f9f9;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
 
     .container {
       background: white;
-      padding: 20px 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      width: 100%;
-      max-width: 500px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+      width: 400px;
       text-align: center;
     }
 
@@ -29,18 +26,18 @@
       margin-bottom: 10px;
     }
 
-    .progress-bar {
-      height: 10px;
+    .progress {
+      height: 8px;
       background: #ddd;
       border-radius: 5px;
       margin-bottom: 20px;
       overflow: hidden;
     }
 
-    .progress {
+    .progress-fill {
       height: 100%;
-      background: #4CAF50;
-      width: 0%;
+      width: 0;
+      background: #28a745; /* verde original */
       transition: width 0.3s;
     }
 
@@ -54,117 +51,119 @@
 
     input {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       margin: 8px 0;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 5px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin: 10px 0;
+    }
+
+    .calendar-day, .time-slot {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .calendar-day.selected, .time-slot.selected {
+      background: #28a745; /* verde original */
+      color: white;
+      font-weight: bold;
+    }
+
+    .buttons {
+      margin-top: 15px;
     }
 
     button {
       padding: 10px 20px;
       border: none;
-      border-radius: 8px;
-      background: #4CAF50;
-      color: white;
-      font-size: 16px;
+      border-radius: 6px;
       cursor: pointer;
       margin: 5px;
-    }
-
-    button:hover {
-      background: #45a049;
-    }
-
-    .calendar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .calendar-day, .time-slot {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      flex: 1 0 21%;
-      text-align: center;
-    }
-
-    .calendar-day.selected, .time-slot.selected {
-      background: #4CAF50;
-      color: white;
       font-weight: bold;
+    }
+
+    #prevBtn {
+      background: #ccc;
+    }
+
+    #nextBtn {
+      background: #28a745;
+      color: white;
     }
 
     #successMessage {
       display: none;
-      padding: 20px;
-      background: #e7ffe7;
-      border: 1px solid #4CAF50;
-      border-radius: 8px;
       margin-top: 20px;
+      color: #28a745;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2 id="instruction">📋 Completa tus datos personales</h2>
+    <h2>📅 Turnero Online</h2>
+    <p id="instruction">Completa tus datos personales ✍️</p>
 
-    <div class="progress-bar">
-      <div class="progress" id="progressFill"></div>
+    <div class="progress">
+      <div class="progress-fill" id="progressFill"></div>
     </div>
 
     <!-- Paso 1 -->
     <div class="step active">
-      <input type="text" id="fullname" placeholder="Nombre completo" required>
-      <input type="text" id="dni" placeholder="DNI" required>
-      <input type="email" id="email" placeholder="Correo electrónico" required>
-      <input type="tel" id="phone" placeholder="Teléfono" required>
+      <input type="text" id="fullname" placeholder="👤 Nombre completo">
+      <input type="text" id="dni" placeholder="🪪 DNI">
+      <input type="email" id="email" placeholder="📧 Correo electrónico">
+      <input type="tel" id="phone" placeholder="📱 Teléfono">
     </div>
 
     <!-- Paso 2 -->
     <div class="step">
-      <h3>📅 Selecciona el día</h3>
+      <h3>📆 Selecciona un día</h3>
       <div class="calendar">
-        <div class="calendar-day">Lunes</div>
-        <div class="calendar-day">Martes</div>
-        <div class="calendar-day">Miércoles</div>
-        <div class="calendar-day">Jueves</div>
-        <div class="calendar-day">Viernes</div>
+        <div class="calendar-day">Lun</div>
+        <div class="calendar-day">Mar</div>
+        <div class="calendar-day">Mié</div>
+        <div class="calendar-day">Jue</div>
+        <div class="calendar-day">Vie</div>
       </div>
 
-      <h3>⏰ Selecciona el horario</h3>
+      <h3>⏰ Selecciona un horario</h3>
       <div class="calendar">
         <div class="time-slot">08:00</div>
         <div class="time-slot">09:00</div>
         <div class="time-slot">10:00</div>
         <div class="time-slot">11:00</div>
         <div class="time-slot">12:00</div>
-        <div class="time-slot">13:00</div>
-        <div class="time-slot">14:00</div>
-        <div class="time-slot">15:00</div>
       </div>
     </div>
 
     <!-- Paso 3 -->
     <div class="step">
       <h3>✅ Confirmación</h3>
-      <p>Revisa que todos los datos sean correctos antes de continuar.</p>
+      <p>Revisa que todos tus datos sean correctos antes de finalizar.</p>
     </div>
 
-    <div>
-      <button id="prevBtn" style="display:none;">Anterior</button>
-      <button id="nextBtn">Siguiente</button>
+    <!-- Botones -->
+    <div class="buttons">
+      <button id="prevBtn">⬅️ Anterior</button>
+      <button id="nextBtn">➡️ Siguiente</button>
     </div>
 
+    <!-- Mensaje Final -->
     <div id="successMessage">
-      <h3>🎉 ¡Turno confirmado!</h3>
-      <p id="successText"></p>
+      <h3>🎉 Turno reservado con éxito</h3>
+      <div id="successText"></div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
     // ==============================
     // VARIABLES GLOBALES
@@ -174,7 +173,7 @@
     let selectedTimeSlot = null;
 
     // ==============================
-    // ELEMENTOS DEL DOM
+    // ELEMENTOS
     // ==============================
     const steps = document.querySelectorAll(".step");
     const nextBtn = document.getElementById("nextBtn");
@@ -202,25 +201,24 @@
       });
 
       progressFill.style.width = `${(step - 1) * 50}%`;
-
       prevBtn.style.display = step === 1 ? "none" : "inline-block";
-      nextBtn.textContent = step === steps.length ? "Finalizar" : "Siguiente";
+      nextBtn.textContent = step === steps.length ? "Finalizar ✅" : "➡️ Siguiente";
 
-      if (step === 1) instruction.textContent = "📋 Completa tus datos personales";
-      if (step === 2) instruction.textContent = "📅 Elige el día y horario de tu turno";
-      if (step === 3) instruction.textContent = "✅ Confirma la información antes de continuar";
+      if (step === 1) instruction.textContent = "Completa tus datos personales ✍️";
+      if (step === 2) instruction.textContent = "Elige el día 📆 y horario ⏰ de tu turno";
+      if (step === 3) instruction.textContent = "Confirma la información antes de continuar ✅";
     }
 
     function validateStep(step) {
       if (step === 1) {
         if (!fullname.value || !dni.value || !email.value || !phone.value) {
-          alert("Por favor completa todos los campos.");
+          alert("⚠️ Por favor completa todos los campos.");
           return false;
         }
       }
       if (step === 2) {
         if (!selectedDay || !selectedTimeSlot) {
-          alert("Por favor selecciona un día y un horario.");
+          alert("⚠️ Por favor selecciona un día y un horario.");
           return false;
         }
       }
@@ -239,20 +237,14 @@
       } else {
         successMessage.style.display = "block";
         successText.innerHTML = `
-          <p><strong>Nombre:</strong> ${fullname.value}</p>
-          <p><strong>DNI:</strong> ${dni.value}</p>
-          <p><strong>Email:</strong> ${email.value}</p>
-          <p><strong>Teléfono:</strong> ${phone.value}</p>
-          <p><strong>Día:</strong> ${selectedDay}</p>
-          <p><strong>Horario:</strong> ${selectedTimeSlot}</p>
-          <h3>🎟 Número de Turno: #TU${Math.floor(100000 + Math.random() * 900000)}</h3>
+          <p><strong>👤 Nombre:</strong> ${fullname.value}</p>
+          <p><strong>🪪 DNI:</strong> ${dni.value}</p>
+          <p><strong>📧 Email:</strong> ${email.value}</p>
+          <p><strong>📱 Teléfono:</strong> ${phone.value}</p>
+          <p><strong>📆 Día:</strong> ${selectedDay}</p>
+          <p><strong>⏰ Horario:</strong> ${selectedTimeSlot}</p>
+          <h3>🆔 Número de Turno: #TU${Math.floor(100000 + Math.random() * 900000)}</h3>
         `;
-
-        confetti({
-          particleCount: 200,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
       }
     });
 
