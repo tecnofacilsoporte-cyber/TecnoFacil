@@ -1,281 +1,968 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Turnero Online 🗓️</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Turnos Web</title>
+    <link rel="shortcut icon" href="/TecnoFacil/Imagenes/TecnoFácil-removebg-preview.png" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-      width: 400px;
-      text-align: center;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
 
-    h2 {
-      margin-bottom: 10px;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            min-height: 80vh;
+        }
 
-    .progress {
-      height: 8px;
-      background: #ddd;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
+        .sidebar {
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            width: 320px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      background: #28a745; /* verde original */
-      transition: width 0.3s;
-    }
+        .sidebar h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
 
-    .step {
-      display: none;
-    }
+        .step {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
 
-    .step.active {
-      display: block;
-    }
+        .step:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
 
-    input {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+        .step.active {
+            background: rgba(52, 152, 219, 0.3);
+            border-left-color: #3498db;
+        }
 
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-      margin: 10px 0;
-    }
+        .step.completed {
+            background: rgba(39, 174, 96, 0.3);
+            border-left-color: #27ae60;
+        }
 
-    .calendar-day, .time-slot {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      cursor: pointer;
-      user-select: none;
-    }
+        .step h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
 
-    .calendar-day.selected, .time-slot.selected {
-      background: #28a745; /* verde original */
-      color: white;
-      font-weight: bold;
-    }
+        .step p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
 
-    .buttons {
-      margin-top: 15px;
-    }
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
 
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 5px;
-      font-weight: bold;
-    }
+        .tutorial-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
 
-    #prevBtn {
-      background: #ccc;
-    }
+        .tutorial-header h1 {
+            font-size: 36px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
 
-    #nextBtn {
-      background: #28a745;
-      color: white;
-    }
+        .turnos-interface {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
 
-    #successMessage {
-      display: none;
-      margin-top: 20px;
-      color: #28a745;
-    }
-  </style>
+        .turnos-interface::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #f1c40f, #2ecc71, #3498db, #9b59b6);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .interface-content {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .form-group.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .calendar-day:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.available {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .calendar-day.selected {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .calendar-day.disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .time-slots-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #ddd;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .time-slot {
+            padding: 12px 8px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .time-slot:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .time-slot.available {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .time-slot.selected {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .confirm-button {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+            opacity: 0;
+            transform: scale(0.9);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .confirm-button.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .confirm-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .instruction-box {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.3);
+            transform: translateX(-100%);
+            transition: all 0.5s ease;
+        }
+
+        .instruction-box.visible {
+            transform: translateX(0);
+        }
+
+        .success-message {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+            margin-top: 20px;
+        }
+
+        .success-message.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .highlight {
+            border-color: #f39c12 !important;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2) !important;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .confirmation-details {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            border: 2px solid #28a745;
+            margin: 20px 0;
+        }
+
+        .confirmation-details h3 {
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .detail-value {
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>📅 Turnero Online</h2>
-    <p id="instruction">Completa tus datos personales ✍️</p>
+    <div class="container">
+        <div class="sidebar">
+            <h2>📅 Tutorial de Turnos</h2>
+            <div class="step active" data-step="1">
+                <h3>1. Tipo de Trámite</h3>
+                <p>Selecciona qué trámite necesitas realizar</p>
+            </div>
+            <div class="step" data-step="2">
+                <h3>2. Datos Personales (no uses tus datos reales)</h3>
+                <p>Completa tu información personal (Datos Ficticios)</p>
+            </div>
+            <div class="step" data-step="3">
+                <h3>3. Seleccionar Fecha</h3>
+                <p>Elige el día que mejor te convenga</p>
+            </div>
+            <div class="step" data-step="4">
+                <h3>4. Elegir Horario</h3>
+                <p>Selecciona el horario disponible</p>
+            </div>
+            <div class="step" data-step="5">
+                <h3>5. Confirmar Turno</h3>
+                <p>Revisa y confirma tu cita</p>
+            </div>
+        </div>
 
-    <div class="progress">
-      <div class="progress-fill" id="progressFill"></div>
+        <div class="main-content">
+            <div class="tutorial-header">
+                <h1>🎯 Tutorial: Sacar Turno Web</h1>
+                <p>Aprende paso a paso cómo solicitar tu turno online</p>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+
+            <div class="instruction-box visible" id="instructionBox">
+                <h3>📍 Paso 1: Tipo de Trámite</h3>
+                <p>Comienza seleccionando el tipo de trámite que necesitas realizar. Cada trámite tiene diferentes requisitos y documentación necesaria.</p>
+            </div>
+
+            <div class="turnos-interface">
+                <div class="interface-content">
+                    <form id="turnosForm">
+                        <!-- Paso 1: Tipo de Trámite -->
+                        <div class="form-group visible" id="tramiteGroup">
+                            <label for="tipoTramite">🏢 Tipo de Trámite:</label>
+                            <select id="tipoTramite" name="tipoTramite" required>
+                                <option value="">-- Selecciona un trámite --</option>
+                                <option value="dni">📄 Renovación de DNI</option>
+                                <option value="pasaporte">🛂 Solicitud de Pasaporte</option>
+                                <option value="registro">🚗 Registro de Conducir</option>
+                                <option value="certificado">📋 Certificado de Nacimiento</option>
+                                <option value="antecedentes">🔍 Certificado de Antecedentes</option>
+                            </select>
+                        </div>
+
+                        <!-- Paso 2: Datos Personales -->
+                        <div class="form-group" id="datosGroup">
+                            <label>👤 Datos Personales:</label>
+                            <div class="form-row">
+                                <div>
+                                    <label for="nombre">Nombre Completo:</label>
+                                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Juan Pérez" required>
+                                </div>
+                                <div>
+                                    <label for="dni">DNI:</label>
+                                    <input type="text" id="dni" name="dni" placeholder="Ej: 12.345.678 (no uses el real)" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div>
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: +54 9 11 1234-5678 (Inventa uno)" required>
+                                </div>
+                                <div>
+                                    <label for="email">Email:</label>
+                                    <input type="email" id="email" name="email" placeholder="Ej: juan@email.com" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 3: Seleccionar Fecha -->
+                        <div class="form-group" id="fechaGroup">
+                            <label>📅 Seleccionar Fecha:</label>
+                            <div class="calendar-container">
+                                <div class="calendar-header">Septiembre 2025</div>
+                                <div class="calendar-grid">
+                                    <div class="calendar-day">L</div>
+                                    <div class="calendar-day">M</div>
+                                    <div class="calendar-day">M</div>
+                                    <div class="calendar-day">J</div>
+                                    <div class="calendar-day">V</div>
+                                    <div class="calendar-day">S</div>
+                                    <div class="calendar-day">D</div>
+                                    
+                                    <div class="calendar-day disabled">1</div>
+                                    <div class="calendar-day disabled">2</div>
+                                    <div class="calendar-day available" data-date="3">3</div>
+                                    <div class="calendar-day disabled">4</div>
+                                    <div class="calendar-day available" data-date="5">5</div>
+                                    <div class="calendar-day disabled">6</div>
+                                    <div class="calendar-day disabled">7</div>
+                                    
+                                    <div class="calendar-day disabled">8</div>
+                                    <div class="calendar-day disabled">9</div>
+                                    <div class="calendar-day available" data-date="10">10</div>
+                                    <div class="calendar-day disabled">11</div>
+                                    <div class="calendar-day available" data-date="12">12</div>
+                                    <div class="calendar-day disabled">13</div>
+                                    <div class="calendar-day disabled">14</div>
+                                    
+                                    <div class="calendar-day available" data-date="15">15</div>
+                                    <div class="calendar-day disabled">16</div>
+                                    <div class="calendar-day available" data-date="17">17</div>
+                                    <div class="calendar-day disabled">18</div>
+                                    <div class="calendar-day available" data-date="19">19</div>
+                                    <div class="calendar-day disabled">20</div>
+                                    <div class="calendar-day disabled">21</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 4: Seleccionar Horario -->
+                        <div class="form-group" id="horarioGroup">
+                            <label>🕒 Horarios Disponibles:</label>
+                            <div class="time-slots-container">
+                                <div class="time-slots">
+                                    <div class="time-slot available" data-time="09:00">09:00</div>
+                                    <div class="time-slot available" data-time="09:30">09:30</div>
+                                    <div class="time-slot available" data-time="10:00">10:00</div>
+                                    <div class="time-slot available" data-time="10:30">10:30</div>
+                                    <div class="time-slot available" data-time="11:00">11:00</div>
+                                    <div class="time-slot available" data-time="11:30">11:30</div>
+                                    <div class="time-slot available" data-time="14:00">14:00</div>
+                                    <div class="time-slot available" data-time="14:30">14:30</div>
+                                    <div class="time-slot available" data-time="15:00">15:00</div>
+                                    <div class="time-slot available" data-time="15:30">15:30</div>
+                                    <div class="time-slot available" data-time="16:00">16:00</div>
+                                    <div class="time-slot available" data-time="16:30">16:30</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 5: Confirmación -->
+                        <div class="form-group" id="confirmacionGroup">
+                            <label>✅ Confirmación de Datos:</label>
+                            <div class="confirmation-details">
+                                <h3>📋 Resumen de tu Turno</h3>
+                                <div class="detail-row">
+                                    <span class="detail-label">Trámite:</span>
+                                    <span class="detail-value" id="resumenTramite">-</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Nombre:</span>
+                                    <span class="detail-value" id="resumenNombre">-</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">DNI:</span>
+                                    <span class="detail-value" id="resumenDNI">-</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Fecha:</span>
+                                    <span class="detail-value" id="resumenFecha">-</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Horario:</span>
+                                    <span class="detail-value" id="resumenHorario">-</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value" id="resumenEmail">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="confirm-button" id="confirmButton">
+                            🎯 Confirmar Turno
+                        </button>
+                    </form>
+
+                    <div class="success-message" id="successMessage">
+                        <h2>🎉 ¡Turno Confirmado Exitosamente!</h2>
+                        <h3 style="margin: 20px 0; color: #fff;">Número de Turno: #TU001234</h3>
+                        <p style="margin-bottom: 20px;">Tu turno ha sido registrado correctamente. Recibirás un email de confirmación con todos los detalles.</p>
+                        <p><strong>📝 Recordatorios importantes:</strong></p>
+                        <ul style="text-align: left; margin: 15px 0; max-width: 400px; margin-left: auto; margin-right: auto;">
+                            <li>✅ Llega 15 minutos antes de tu cita</li>
+                            <li>✅ Trae tu DNI original y fotocopia</li>
+                            <li>✅ Revisa el email de confirmación</li>
+                            <li>✅ Guarda el número de turno</li>
+                        </ul>
+                        <button onclick="resetTutorial()" style="background: transparent; border: 2px solid white; color: white; padding: 12px 25px; border-radius: 25px; margin-top: 20px; cursor: pointer; font-weight: 600;">
+                            🔄 Comenzar de Nuevo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Paso 1 -->
-    <div class="step active">
-      <input type="text" id="fullname" placeholder="👤 Nombre completo">
-      <input type="text" id="dni" placeholder="🪪 DNI">
-      <input type="email" id="email" placeholder="📧 Correo electrónico">
-      <input type="tel" id="phone" placeholder="📱 Teléfono">
-    </div>
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        let selectedData = {
+            tramite: '',
+            nombre: '',
+            dni: '',
+            telefono: '',
+            email: '',
+            fecha: '',
+            horario: ''
+        };
 
-    <!-- Paso 2 -->
-    <div class="step">
-      <h3>📆 Selecciona un día</h3>
-      <div class="calendar">
-        <div class="calendar-day">Lun</div>
-        <div class="calendar-day">Mar</div>
-        <div class="calendar-day">Mié</div>
-        <div class="calendar-day">Jue</div>
-        <div class="calendar-day">Vie</div>
-      </div>
+        const steps = {
+            1: {
+                title: "📍 Paso 1: Tipo de Trámite",
+                instruction: "Comienza seleccionando el tipo de trámite que necesitas realizar. Cada trámite tiene diferentes requisitos y documentación necesaria.",
+                field: "tipoTramite",
+                group: "tramiteGroup"
+            },
+            2: {
+                title: "📍 Paso 2: Datos Personales (No uses tus datos reales)",
+                instruction: "Ahora completa tu información personal. Asegúrate de que todos los datos estén correctos, ya que se utilizarán para generar tu turno y enviarte la confirmación.",
+                field: "nombre",
+                group: "datosGroup"
+            },
+            3: {
+                title: "📍 Paso 3: Seleccionar Fecha",
+                instruction: "Elige la fecha que mejor te convenga. Los días en verde tienen turnos disponibles. Haz clic en el día que prefieras.",
+                field: "fechaGroup",
+                group: "fechaGroup"
+            },
+            4: {
+                title: "📍 Paso 4: Elegir Horario",
+                instruction: "Selecciona el horario que más te convenga de los disponibles. Los horarios de la mañana suelen tener menos demora.",
+                field: "horarioGroup",
+                group: "horarioGroup"
+            },
+            5: {
+                title: "📍 Paso 5: Confirmar Turno",
+                instruction: "¡Perfecto! Revisa todos tus datos y haz clic en 'Confirmar Turno' para completar el proceso. ¡Ya casi terminas!",
+                field: "confirmButton",
+                group: "confirmacionGroup"
+            }
+        };
 
-      <h3>⏰ Selecciona un horario</h3>
-      <div class="calendar">
-        <div class="time-slot">08:00</div>
-        <div class="time-slot">09:00</div>
-        <div class="time-slot">10:00</div>
-        <div class="time-slot">11:00</div>
-        <div class="time-slot">12:00</div>
-      </div>
-    </div>
-
-    <!-- Paso 3 -->
-    <div class="step">
-      <h3>✅ Confirmación</h3>
-      <p>Revisa que todos tus datos sean correctos antes de finalizar.</p>
-    </div>
-
-    <!-- Botones -->
-    <div class="buttons">
-      <button id="prevBtn">⬅️ Anterior</button>
-      <button id="nextBtn">➡️ Siguiente</button>
-    </div>
-
-    <!-- Mensaje Final -->
-    <div id="successMessage">
-      <h3>🎉 Turno reservado con éxito</h3>
-      <div id="successText"></div>
-    </div>
-  </div>
-
-  <script>
-    // ==============================
-    // VARIABLES GLOBALES
-    // ==============================
-    let currentStep = 1;
-    let selectedDay = null;
-    let selectedTimeSlot = null;
-
-    // ==============================
-    // ELEMENTOS
-    // ==============================
-    const steps = document.querySelectorAll(".step");
-    const nextBtn = document.getElementById("nextBtn");
-    const prevBtn = document.getElementById("prevBtn");
-    const progressFill = document.getElementById("progressFill");
-    const instruction = document.getElementById("instruction");
-
-    const fullname = document.getElementById("fullname");
-    const dni = document.getElementById("dni");
-    const email = document.getElementById("email");
-    const phone = document.getElementById("phone");
-
-    const calendarDays = document.querySelectorAll(".calendar-day");
-    const timeSlots = document.querySelectorAll(".time-slot");
-
-    const successMessage = document.getElementById("successMessage");
-    const successText = document.getElementById("successText");
-
-    // ==============================
-    // FUNCIONES
-    // ==============================
-    function updateStep(step) {
-      steps.forEach((s, i) => {
-        s.classList.toggle("active", i === step - 1);
-      });
-
-      progressFill.style.width = `${(step - 1) * 50}%`;
-      prevBtn.style.display = step === 1 ? "none" : "inline-block";
-      nextBtn.textContent = step === steps.length ? "Finalizar ✅" : "➡️ Siguiente";
-
-      if (step === 1) instruction.textContent = "Completa tus datos personales ✍️";
-      if (step === 2) instruction.textContent = "Elige el día 📆 y horario ⏰ de tu turno";
-      if (step === 3) instruction.textContent = "Confirma la información antes de continuar ✅";
-    }
-
-    function validateStep(step) {
-      if (step === 1) {
-        if (!fullname.value || !dni.value || !email.value || !phone.value) {
-          alert("⚠️ Por favor completa todos los campos.");
-          return false;
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progress = (currentStep / totalSteps) * 100;
+            progressBar.style.width = progress + '%';
         }
-      }
-      if (step === 2) {
-        if (!selectedDay || !selectedTimeSlot) {
-          alert("⚠️ Por favor selecciona un día y un horario.");
-          return false;
+
+        function updateInstruction() {
+            const instructionBox = document.getElementById('instructionBox');
+            const step = steps[currentStep];
+            
+            instructionBox.classList.remove('visible');
+            
+            setTimeout(() => {
+                instructionBox.innerHTML = `
+                    <h3>${step.title}</h3>
+                    <p>${step.instruction}</p>
+                `;
+                instructionBox.classList.add('visible');
+            }, 250);
         }
-      }
-      return true;
-    }
 
-    // ==============================
-    // EVENTOS
-    // ==============================
-    nextBtn.addEventListener("click", () => {
-      if (!validateStep(currentStep)) return;
+        function highlightField(fieldId) {
+            // Remove highlight from all fields
+            document.querySelectorAll('input, select, .calendar-container, .time-slots-container').forEach(el => {
+                el.classList.remove('highlight');
+            });
+            
+            // Add highlight to current field
+            const field = document.getElementById(fieldId) || document.querySelector(`.${fieldId}`);
+            if (field) {
+                field.classList.add('highlight');
+                if (field.focus) field.focus();
+            }
+        }
 
-      if (currentStep < steps.length) {
-        currentStep++;
-        updateStep(currentStep);
-      } else {
-        successMessage.style.display = "block";
-        successText.innerHTML = `
-          <p><strong>👤 Nombre:</strong> ${fullname.value}</p>
-          <p><strong>🪪 DNI:</strong> ${dni.value}</p>
-          <p><strong>📧 Email:</strong> ${email.value}</p>
-          <p><strong>📱 Teléfono:</strong> ${phone.value}</p>
-          <p><strong>📆 Día:</strong> ${selectedDay}</p>
-          <p><strong>⏰ Horario:</strong> ${selectedTimeSlot}</p>
-          <h3>🆔 Número de Turno: #TU${Math.floor(100000 + Math.random() * 900000)}</h3>
+        function showFormGroup(groupId) {
+            const group = document.getElementById(groupId);
+            if (group) {
+                setTimeout(() => {
+                    group.classList.add('visible');
+                }, 300);
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Mark current step as completed
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+                
+                currentStep++;
+                
+                // Update sidebar
+                document.querySelectorAll('.step').forEach((step, index) => {
+                    if (index + 1 === currentStep) {
+                        step.classList.add('active');
+                    } else if (index + 1 < currentStep) {
+                        step.classList.remove('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+                
+                updateProgress();
+                updateInstruction();
+                
+                const step = steps[currentStep];
+                if (step.group) {
+                    showFormGroup(step.group);
+                }
+                
+                if (step.field === 'confirmButton') {
+                    const button = document.getElementById('confirmButton');
+                    button.classList.add('visible');
+                    updateConfirmationDetails();
+                }
+                
+                highlightField(step.field);
+            }
+        }
+
+        function updateConfirmationDetails() {
+            document.getElementById('resumenTramite').textContent = selectedData.tramite;
+            document.getElementById('resumenNombre').textContent = selectedData.nombre;
+            document.getElementById('resumenDNI').textContent = selectedData.dni;
+            document.getElementById('resumenFecha').textContent = selectedData.fecha;
+            document.getElementById('resumenHorario').textContent = selectedData.horario;
+            document.getElementById('resumenEmail').textContent = selectedData.email;
+        }
+
+        function resetTutorial() {
+            currentStep = 1;
+            selectedData = {
+                tramite: '',
+                nombre: '',
+                dni: '',
+                telefono: '',
+                email: '',
+                fecha: '',
+                horario: ''
+            };
+            
+            // Reset form
+            document.getElementById('turnosForm').reset();
+            document.getElementById('successMessage').classList.remove('visible');
+            
+            // Hide all form groups except the first one
+            document.querySelectorAll('.form-group').forEach((group, index) => {
+                if (index === 0) {
+                    group.classList.add('visible');
+                } else {
+                    group.classList.remove('visible');
+                }
+            });
+            
+            // Remove selections
+            document.querySelectorAll('.calendar-day.selected, .time-slot.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            document.getElementById('confirmButton').classList.remove('visible');
+            
+            // Reset sidebar
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.classList.remove('completed', 'active');
+                if (index === 0) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Reset interface opacity
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.style.opacity = '1';
+            });
+            document.getElementById('confirmButton').style.opacity = '1';
+            
+            // Reset background
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            
+            updateProgress();
+            updateInstruction();
+            highlightField('tipoTramite');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            highlightField('tipoTramite');
+            
+            // Tipo de trámite change
+            document.getElementById('tipoTramite').addEventListener('change', function() {
+                if (currentStep === 1 && this.value) {
+                    selectedData.tramite = this.selectedOptions[0].text;
+                    setTimeout(nextStep, 1000);
+                }
+            });
+            
+            // Datos personales input events
+            const datosFields = ['nombre', 'dni', 'telefono', 'email'];
+            datosFields.forEach(fieldId => {
+                document.getElementById(fieldId).addEventListener('input', function() {
+                    selectedData[fieldId] = this.value;
+                    
+                    if (currentStep === 2) {
+                        const allFieldsFilled = datosFields.every(id => 
+                            document.getElementById(id).value.trim() !== ''
+                        );
+                        
+                        if (allFieldsFilled) {
+                            setTimeout(nextStep, 1500);
+                        }
+                    }
+                });
+            });
+            
+            // Calendar day clicks
+            document.querySelectorAll('.calendar-day.available').forEach(day => {
+                day.addEventListener('click', function() {
+                    if (currentStep === 3) {
+                        // Remove previous selection
+                        document.querySelectorAll('.calendar-day.selected').forEach(d => {
+                            d.classList.remove('selected');
+                        });
+                        
+                        // Select new date
+                        this.classList.add('selected');
+                        const date = this.dataset.date;
+                        selectedData.fecha = `${date} de Septiembre, 2025`;
+                        
+                        setTimeout(nextStep, 1000);
+                    }
+                });
+            });
+            
+            // Time slot clicks
+            document.getElementById('horarioGroup').addEventListener('click', function(e) {
+                const slot = e.target.closest('.time-slot.available');
+                if (!slot || currentStep !== 4) return;
+
+            // Quitar selección anterior
+            document.querySelectorAll('.time-slot.selected').forEach(s => s.classList.remove('selected'));
+
+            // Seleccionar nuevo horario
+            slot.classList.add('selected');
+            selectedData.horario = slot.dataset.time;
+
+            // Avanzar paso
+            setTimeout(nextStep, 500);
+});
+
+            
+            // Form submission
+            document.getElementById('turnosForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (currentStep === 5) {
+                    // Show success message
+                    document.getElementById('successMessage').classList.add('visible');
+                    
+                    // Hide form elements
+                    document.querySelectorAll('.form-group').forEach(group => {
+                        group.style.opacity = '0.3';
+                    });
+                    document.getElementById('confirmButton').style.opacity = '0.3';
+                    
+                    // Update progress to 100%
+                    document.getElementById('progressBar').style.width = '100%';
+                    
+                    // Celebration effect
+                    setTimeout(() => {
+                        document.body.style.background = 'linear-gradient(135deg, #00b894 0%, #00a085 100%)';
+                    }, 500);
+                    
+                    // Confetti effect simulation
+                    setTimeout(() => {
+                        for (let i = 0; i < 50; i++) {
+                            createConfetti();
+                        }
+                    }, 1000);
+                }
+            });
+            
+            // Sidebar step clicks
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.addEventListener('click', function() {
+                    // Only allow clicking on completed steps or current step
+                    if (index + 1 <= currentStep || step.classList.contains('completed')) {
+                        const stepData = steps[index + 1];
+                        if (stepData) {
+                            highlightField(stepData.field);
+                        }
+                    }
+                });
+            });
+        });
+
+        // Confetti animation function
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.style.cssText = `
+                position: fixed;
+                width: 10px;
+                height: 10px;
+                background: ${['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b'][Math.floor(Math.random() * 6)]};
+                top: -10px;
+                left: ${Math.random() * 100}%;
+                z-index: 9999;
+                border-radius: 50%;
+                pointer-events: none;
+                animation: confetti-fall ${Math.random() * 2 + 3}s linear forwards;
+            `;
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+        
+        // Add confetti animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes confetti-fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                }
+            }
         `;
-      }
-    });
-
-    prevBtn.addEventListener("click", () => {
-      if (currentStep > 1) {
-        currentStep--;
-        updateStep(currentStep);
-      }
-    });
-
-    calendarDays.forEach(day => {
-      day.addEventListener("click", function () {
-        calendarDays.forEach(d => d.classList.remove("selected"));
-        this.classList.add("selected");
-        selectedDay = this.textContent;
-      });
-    });
-
-    timeSlots.forEach(slot => {
-      slot.addEventListener("click", function () {
-        timeSlots.forEach(s => s.classList.remove("selected"));
-        this.classList.add("selected");
-        selectedTimeSlot = this.textContent;
-      });
-    });
-
-    // ==============================
-    // INICIO
-    // ==============================
-    updateStep(currentStep);
-  </script>
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
-
