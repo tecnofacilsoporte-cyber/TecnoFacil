@@ -219,6 +219,9 @@
             background: #d4edda;
             border-color: #28a745;
             color: #155724;
+             cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .calendar-day.selected {
@@ -269,6 +272,9 @@
             background: #d4edda;
             border-color: #28a745;
             color: #155724;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .time-slot.selected {
@@ -862,7 +868,12 @@
                         this.classList.add('selected');
                         const date = this.dataset.date;
                         selectedData.fecha = `${date} de Septiembre, 2025`;
-                        
+
+            document.getElementById('fechaGroup').addEventListener('touchstart', function(e) {
+                const day = e.target.closest('.calendar-day.available');
+                if (!day || currentStep !== 3) return;
+                day.click();
+});
                         setTimeout(nextStep, 1000);
                     }
                 });
@@ -879,6 +890,12 @@
             // Seleccionar nuevo horario
             slot.classList.add('selected');
             selectedData.horario = slot.dataset.time;
+
+            document.getElementById('horarioGroup').addEventListener('touchstart', function(e) {
+            const slot = e.target.closest('.time-slot.available');
+            if (!slot || currentStep !== 4) return;
+            slot.click();
+});
 
             // Avanzar paso
             setTimeout(nextStep, 500);
